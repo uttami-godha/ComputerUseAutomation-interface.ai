@@ -1,0 +1,92 @@
+{
+  "$comment": "Safety & policy guardrails. The agent may not act outside this. Loaded by src/config.ts; overridable per-run with --policy <file>.",
+  "version": 1,
+  "allowlist": {
+    "$comment": "Only these origins + path prefixes are navigable. Anything else is blocked before the action runs.",
+    "origins": [
+      "http://localhost:7799",
+      "http://127.0.0.1:7799"
+    ],
+    "pathPrefixes": [
+      "/"
+    ],
+    "actionTypes": [
+      "navigate",
+      "click",
+      "type",
+      "select",
+      "press",
+      "read",
+      "waitFor",
+      "assert"
+    ]
+  },
+  "risk": {
+    "$comment": "How an action's risk class is decided during discovery/replay. Intent from the LLM or step can override, but never downgrade an irreversible match.",
+    "irreversibleIntents": [
+      "delete",
+      "remove",
+      "submit",
+      "approve",
+      "update",
+      "save",
+      "post"
+    ],
+    "riskyIntents": [
+      "create",
+      "open_account",
+      "close_account",
+      "transfer",
+      "wire",
+      "submit_payment",
+      "disburse"
+    ],
+    "safeActionTypes": [
+      "navigate",
+      "read",
+      "waitFor",
+      "assert",
+      "type",
+      "select",
+      "press"
+    ],
+    "riskyControlText": [
+      "delete",
+      "remove",
+      "confirm",
+      "submit",
+      "transfer",
+      "pay",
+      "close account",
+      "approve"
+    ]
+  },
+  "handling": {
+    "$comment": "What to do per risk class. In discovery, risky/irreversible steps are recorded but flagged; unattended replay obeys these.",
+    "irreversible": "require_confirmation",
+    "risky": "require_approval",
+    "safe": "allow"
+  },
+  "redaction": {
+    "$comment": "Values matching these patterns are masked in ALL logs, evidence, DOM snapshots, and artifacts. Params flagged redact: true are stored only as references, never as raw values.",
+    "patterns": [
+      {
+        "name": "ssn",
+        "regex": "\\b\\d{3}-\\d{2}-\\d{4}\\b"
+      },
+      {
+        "name": "pan",
+        "regex": "\\b(?:\\d[ -]*?){13,19}\\b"
+      },
+      {
+        "name": "account_number",
+        "regex": "\\b\\d{8,17}\\b"
+      },
+      {
+        "name": "email",
+        "regex": "\\b[\\w.+-]+@[\\w-]+\\.[\\w.-]+\\b"
+      }
+    ],
+    "mask": "[REDACTED:{name}]"
+  }
+}

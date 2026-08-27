@@ -1,0 +1,54 @@
+{
+  "capabilityId": "servicing.read_savings_balance",
+  "tenantId": "cu-b",
+  "baseUrl": "http://localhost:7799",
+  "entryPath": "/t/cu-b/",
+  "note": "Same vendor product (MemberServicing), different tenant. Only three drifted labels change: 'Member Number' instead of 'Member ID', 'Find Member' instead of 'Search', 'Savings Bal.' instead of 'Savings Balance'. Everything else (login, structure, outcome rules) is reused from the base artifact. Without this override, replay still succeeds via structural fallbacks.",
+  "stepOverrides": {
+    "type-member": {
+      "strategies": [
+        {
+          "kind": "role",
+          "role": "textbox",
+          "name": "Member Number",
+          "exact": false
+        },
+        {
+          "kind": "label",
+          "text": "Member Number"
+        },
+        {
+          "kind": "nearLabel",
+          "label": "Member Number"
+        },
+        {
+          "kind": "css",
+          "selector": "input[name=\"memberId\"]"
+        }
+      ]
+    },
+    "click-search": {
+      "strategies": [
+        {
+          "kind": "role",
+          "role": "button",
+          "name": "Find Member",
+          "exact": false
+        },
+        {
+          "kind": "text",
+          "text": "Find Member",
+          "exact": false
+        }
+      ]
+    },
+    "read-1": {
+      "strategies": [
+        {
+          "kind": "nearLabel",
+          "label": "Savings Bal."
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "status": "success",
+  "capabilityId": "servicing.read_savings_balance",
+  "runId": "replay-interstitial-scripted",
+  "drift": [],
+  "recovered": [
+    {
+      "stepId": "click-search",
+      "outcome": "SESSION_INTERSTITIAL",
+      "action": "dismiss_and_continue"
+    }
+  ],
+  "stepsRun": 6,
+  "outputs": {
+    "savings_balance": "$100.00"
+  }
+}

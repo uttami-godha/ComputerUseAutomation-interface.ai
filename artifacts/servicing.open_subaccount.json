@@ -1,0 +1,397 @@
+{
+  "schemaVersion": "2.0.0",
+  "capabilityId": "servicing.open_subaccount",
+  "name": "Open member sub-account",
+  "description": "Sign in, find a member, open the sub-account flow, enter account details, review the request, and return the confirmation reference.",
+  "version": 1,
+  "status": "draft",
+  "confidence": 0.9,
+  "target": {
+    "surfaceKind": "legacy-web",
+    "appId": "member-servicing",
+    "vendorProduct": "MemberServicing",
+    "tenantId": "cu-a",
+    "baseUrl": "http://localhost:7799",
+    "entryPath": "/t/cu-a/"
+  },
+  "params": [
+    {
+      "name": "operator_id",
+      "type": "string",
+      "required": true,
+      "redact": false,
+      "description": "Operator login ID."
+    },
+    {
+      "name": "operator_password",
+      "type": "string",
+      "required": true,
+      "redact": true,
+      "description": "Operator password."
+    },
+    {
+      "name": "member_id",
+      "type": "string",
+      "required": true,
+      "redact": false,
+      "description": "Member ID."
+    },
+    {
+      "name": "account_type",
+      "type": "string",
+      "required": true,
+      "redact": false,
+      "description": "Sub-account type."
+    },
+    {
+      "name": "initial_deposit",
+      "type": "string",
+      "required": true,
+      "redact": false,
+      "description": "Initial deposit amount."
+    },
+    {
+      "name": "account_nickname",
+      "type": "string",
+      "required": false,
+      "redact": false,
+      "description": "Optional account nickname."
+    }
+  ],
+  "outputs": [
+    {
+      "name": "confirmation_ref",
+      "type": "string",
+      "redact": false,
+      "fromStep": "read-confirmation",
+      "description": "Confirmation reference shown after review."
+    }
+  ],
+  "steps": [
+    {
+      "id": "type-operator",
+      "intent": "Enter operator ID",
+      "risk": "safe",
+      "action": {
+        "type": "type",
+        "value": {
+          "param": "operator_id"
+        }
+      },
+      "target": {
+        "description": "Operator ID field (structural).",
+        "strategies": [
+          {
+            "kind": "css",
+            "selector": "input[name=\"op\"]"
+          },
+          {
+            "kind": "nearLabel",
+            "label": "Operator ID"
+          }
+        ]
+      }
+    },
+    {
+      "id": "type-password",
+      "intent": "Enter operator password",
+      "risk": "safe",
+      "action": {
+        "type": "type",
+        "value": {
+          "param": "operator_password"
+        },
+        "secret": true
+      },
+      "target": {
+        "description": "Password field (structural); redacted param.",
+        "strategies": [
+          {
+            "kind": "css",
+            "selector": "input[name=\"pw\"]"
+          },
+          {
+            "kind": "nearLabel",
+            "label": "Password"
+          }
+        ]
+      }
+    },
+    {
+      "id": "click-signin",
+      "intent": "Sign in",
+      "risk": "safe",
+      "action": {
+        "type": "click"
+      },
+      "target": {
+        "description": "Sign In button.",
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "button",
+            "name": "Sign In",
+            "exact": false
+          }
+        ]
+      },
+      "checkpoint": {
+        "text": "Member Lookup"
+      }
+    },
+    {
+      "id": "type-member",
+      "intent": "Enter member ID",
+      "risk": "safe",
+      "action": {
+        "type": "type",
+        "value": {
+          "param": "member_id"
+        }
+      },
+      "target": {
+        "description": "Member ID field by role/name; structural fallback.",
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "textbox",
+            "name": "Member ID",
+            "exact": false
+          },
+          {
+            "kind": "nearLabel",
+            "label": "Member ID"
+          },
+          {
+            "kind": "css",
+            "selector": "input[name=\"memberId\"]"
+          }
+        ]
+      }
+    },
+    {
+      "id": "click-search",
+      "intent": "Search for member",
+      "risk": "safe",
+      "action": {
+        "type": "click"
+      },
+      "target": {
+        "description": "Search button.",
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "button",
+            "name": "Search",
+            "exact": false
+          }
+        ]
+      },
+      "checkpoint": {
+        "text": "Member Detail"
+      }
+    },
+    {
+      "id": "click-open-subaccount",
+      "intent": "Open the sub-account workflow",
+      "risk": "safe",
+      "action": {
+        "type": "click"
+      },
+      "target": {
+        "description": "Open Sub-Account link.",
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "link",
+            "name": "Open Sub-Account",
+            "exact": false
+          },
+          {
+            "kind": "text",
+            "text": "Open Sub-Account",
+            "exact": false
+          }
+        ]
+      },
+      "checkpoint": {
+        "text": "Open Sub-Account for Member"
+      }
+    },
+    {
+      "id": "select-account-type",
+      "intent": "Choose account type",
+      "risk": "safe",
+      "action": {
+        "type": "select",
+        "value": {
+          "param": "account_type"
+        }
+      },
+      "target": {
+        "description": "Account Type dropdown by role+name.",
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "combobox",
+            "name": "Account Type",
+            "exact": false
+          },
+          {
+            "kind": "label",
+            "text": "Account Type"
+          }
+        ]
+      }
+    },
+    {
+      "id": "type-initial-deposit",
+      "intent": "Enter initial deposit",
+      "risk": "safe",
+      "action": {
+        "type": "type",
+        "value": {
+          "param": "initial_deposit"
+        }
+      },
+      "target": {
+        "description": "Initial Deposit field by label.",
+        "strategies": [
+          {
+            "kind": "label",
+            "text": "Initial Deposit"
+          },
+          {
+            "kind": "nearLabel",
+            "label": "Initial Deposit"
+          }
+        ]
+      }
+    },
+    {
+      "id": "type-nickname",
+      "intent": "Enter account nickname",
+      "risk": "safe",
+      "action": {
+        "type": "type",
+        "value": {
+          "param": "account_nickname"
+        }
+      },
+      "target": {
+        "description": "Nickname field by label.",
+        "strategies": [
+          {
+            "kind": "label",
+            "text": "Nickname"
+          },
+          {
+            "kind": "nearLabel",
+            "label": "Nickname"
+          }
+        ]
+      }
+    },
+    {
+      "id": "click-review",
+      "intent": "Review the new sub-account request",
+      "risk": "risky",
+      "action": {
+        "type": "click"
+      },
+      "target": {
+        "description": "Review submit button by role+name. RISKY: mutates state, so gated on approval/confirmation at replay.",
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "button",
+            "name": "Review",
+            "exact": false
+          }
+        ]
+      },
+      "checkpoint": {
+        "text": "Review New Sub-Account"
+      },
+      "outcomes": [
+        {
+          "outcome": "VALIDATION_ERROR",
+          "whenTextMatches": "must be a positive dollar amount|is required",
+          "classification": "business",
+          "action": "return",
+          "message": "Form validation failed; caller should correct inputs."
+        }
+      ]
+    },
+    {
+      "id": "read-confirmation",
+      "intent": "Read the confirmation reference",
+      "risk": "safe",
+      "action": {
+        "type": "read"
+      },
+      "extractAs": "confirmation_ref",
+      "target": {
+        "description": "Confirmation Ref value cell (nearLabel).",
+        "strategies": [
+          {
+            "kind": "nearLabel",
+            "label": "Confirmation Ref"
+          }
+        ]
+      }
+    }
+  ],
+  "globalOutcomes": [
+    {
+      "outcome": "SESSION_INTERSTITIAL",
+      "whenTextMatches": "session was idle|do you want to continue",
+      "classification": "recoverable",
+      "action": "dismiss_and_continue",
+      "recover": {
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "link",
+            "name": "Continue",
+            "exact": false
+          }
+        ],
+        "maxRetries": 2
+      },
+      "message": "Dismissed idle-session interstitial."
+    },
+    {
+      "outcome": "NO_SUCH_MEMBER",
+      "whenTextMatches": "No member found",
+      "classification": "business",
+      "action": "return",
+      "message": "No member exists for the supplied id."
+    },
+    {
+      "outcome": "ACCESS_DENIED",
+      "whenTextMatches": "not authorized to view",
+      "classification": "business",
+      "action": "return",
+      "message": "Operator is not authorized to view this member."
+    },
+    {
+      "outcome": "SYSTEM_ERROR",
+      "whenTextMatches": "unexpected error|HTTP 500",
+      "classification": "hard",
+      "action": "stop",
+      "message": "Backend system error."
+    }
+  ],
+  "successCondition": {
+    "text": "Review New Sub-Account",
+    "allOutputsPresent": true
+  },
+  "provenance": {
+    "discoveredBy": "claude (illustrative golden)",
+    "discoveredAt": "2026-08-19T00:00:00.000Z",
+    "runId": "golden-open-subaccount",
+    "redactionPolicyVersion": 1,
+    "notes": "Hand-authored golden matching the mock app. The Review step is intentionally risky so replay demonstrates policy gating and human escalation."
+  }
+}

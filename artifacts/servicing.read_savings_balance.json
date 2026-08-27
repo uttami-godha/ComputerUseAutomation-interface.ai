@@ -1,0 +1,262 @@
+{
+  "schemaVersion": "2.0.0",
+  "capabilityId": "servicing.read_savings_balance",
+  "name": "Read member savings balance",
+  "description": "Sign in to the servicing console, find a member by member ID, and return the member's savings balance.",
+  "version": 1,
+  "status": "approved",
+  "confidence": 0.96,
+  "target": {
+    "surfaceKind": "legacy-web",
+    "appId": "member-servicing",
+    "vendorProduct": "MemberServicing",
+    "tenantId": "cu-a",
+    "baseUrl": "http://localhost:7799",
+    "entryPath": "/t/cu-a/"
+  },
+  "params": [
+    {
+      "name": "operator_id",
+      "type": "string",
+      "required": true,
+      "redact": false,
+      "description": "Operator login ID."
+    },
+    {
+      "name": "operator_password",
+      "type": "string",
+      "required": true,
+      "redact": true,
+      "description": "Operator password."
+    },
+    {
+      "name": "member_id",
+      "type": "string",
+      "required": true,
+      "redact": false,
+      "description": "Member ID to look up."
+    }
+  ],
+  "outputs": [
+    {
+      "name": "savings_balance",
+      "type": "string",
+      "redact": false,
+      "fromStep": "read-1",
+      "description": "The member's displayed savings balance."
+    }
+  ],
+  "steps": [
+    {
+      "id": "type-operator",
+      "intent": "Enter the operator ID",
+      "risk": "safe",
+      "action": {
+        "type": "type",
+        "value": {
+          "param": "operator_id"
+        }
+      },
+      "target": {
+        "description": "Operator ID field (structural).",
+        "strategies": [
+          {
+            "kind": "css",
+            "selector": "input[name=\"op\"]"
+          },
+          {
+            "kind": "nearLabel",
+            "label": "Operator ID"
+          }
+        ]
+      }
+    },
+    {
+      "id": "type-password",
+      "intent": "Enter the operator password",
+      "risk": "safe",
+      "action": {
+        "type": "type",
+        "value": {
+          "param": "operator_password"
+        },
+        "secret": true
+      },
+      "target": {
+        "description": "Password field (structural); redacted param.",
+        "strategies": [
+          {
+            "kind": "css",
+            "selector": "input[name=\"pw\"]"
+          },
+          {
+            "kind": "nearLabel",
+            "label": "Password"
+          }
+        ]
+      }
+    },
+    {
+      "id": "click-signin",
+      "intent": "Sign in",
+      "risk": "safe",
+      "action": {
+        "type": "click"
+      },
+      "target": {
+        "description": "Sign In button by role+name.",
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "button",
+            "name": "Sign In",
+            "exact": false
+          }
+        ]
+      },
+      "checkpoint": {
+        "text": "Member Lookup"
+      }
+    },
+    {
+      "id": "type-member",
+      "intent": "Enter the member ID",
+      "risk": "safe",
+      "action": {
+        "type": "type",
+        "value": {
+          "param": "member_id"
+        }
+      },
+      "target": {
+        "description": "Member ID field by role+name; label and structural selector are fallbacks.",
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "textbox",
+            "name": "Member ID",
+            "exact": false
+          },
+          {
+            "kind": "label",
+            "text": "Member ID"
+          },
+          {
+            "kind": "nearLabel",
+            "label": "Member ID"
+          },
+          {
+            "kind": "css",
+            "selector": "input[name=\"memberId\"]"
+          }
+        ]
+      }
+    },
+    {
+      "id": "click-search",
+      "intent": "Search for the member",
+      "risk": "safe",
+      "action": {
+        "type": "click"
+      },
+      "target": {
+        "description": "Search button by role+name; visible text fallback.",
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "button",
+            "name": "Search",
+            "exact": false
+          },
+          {
+            "kind": "text",
+            "text": "Search",
+            "exact": false
+          }
+        ]
+      },
+      "checkpoint": {
+        "text": "Member Detail"
+      }
+    },
+    {
+      "id": "read-1",
+      "intent": "Read the savings balance value",
+      "risk": "safe",
+      "action": {
+        "type": "read"
+      },
+      "extractAs": "savings_balance",
+      "target": {
+        "description": "Legacy label:value row - the value cell adjacent to the 'Savings Balance' label. nearLabel survives structural churn; xpath is the fallback.",
+        "strategies": [
+          {
+            "kind": "nearLabel",
+            "label": "Savings Balance"
+          },
+          {
+            "kind": "xpath",
+            "selector": "/html/body/div[2]/table/tr[4]/td[2]"
+          }
+        ]
+      }
+    }
+  ],
+  "globalOutcomes": [
+    {
+      "outcome": "SESSION_INTERSTITIAL",
+      "whenTextMatches": "session was idle|do you want to continue",
+      "classification": "recoverable",
+      "action": "dismiss_and_continue",
+      "recover": {
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "link",
+            "name": "Continue",
+            "exact": false
+          },
+          {
+            "kind": "text",
+            "text": "Continue",
+            "exact": false
+          }
+        ],
+        "maxRetries": 2
+      },
+      "message": "Dismissed idle-session interstitial and continued."
+    },
+    {
+      "outcome": "NO_SUCH_MEMBER",
+      "whenTextMatches": "No member found",
+      "classification": "business",
+      "action": "return",
+      "message": "No member exists for the supplied id."
+    },
+    {
+      "outcome": "ACCESS_DENIED",
+      "whenTextMatches": "not authorized to view",
+      "classification": "business",
+      "action": "return",
+      "message": "Operator is not authorized to view this member."
+    },
+    {
+      "outcome": "SYSTEM_ERROR",
+      "whenTextMatches": "unexpected error|HTTP 500",
+      "classification": "hard",
+      "action": "stop",
+      "message": "Backend system error."
+    }
+  ],
+  "successCondition": {
+    "text": "Member Detail",
+    "allOutputsPresent": true
+  },
+  "provenance": {
+    "discoveredBy": "claude (illustrative golden - regenerate with `npm run discover`)",
+    "discoveredAt": "2026-08-19T00:00:00.000Z",
+    "runId": "golden-read-savings",
+    "redactionPolicyVersion": 1,
+    "notes": "Hand-authored golden matching the mock app, so replay demos run without an LLM. A real discovery run emits the same shape."
+  }
+}
