@@ -2,13 +2,13 @@
   "schemaVersion": "2.0.0",
   "capabilityId": "servicing.read_savings_balance",
   "name": "Read member savings balance",
-  "description": "Sign in to the servicing console, find a member by member ID, and return the member's savings balance.",
+  "description": "Sign in to the servicing console, find member 12345, read the Savings Balance, and finish.",
   "version": 1,
-  "status": "approved",
-  "confidence": 0.96,
+  "status": "draft",
+  "confidence": 0.7,
   "target": {
     "surfaceKind": "legacy-web",
-    "appId": "member-servicing",
+    "appId": "MemberServicing",
     "vendorProduct": "MemberServicing",
     "tenantId": "cu-a",
     "baseUrl": "http://localhost:7799",
@@ -20,21 +20,21 @@
       "type": "string",
       "required": true,
       "redact": false,
-      "description": "Operator login ID."
+      "description": "Enter the operator ID to sign in"
     },
     {
-      "name": "operator_password",
+      "name": "password",
       "type": "string",
       "required": true,
       "redact": true,
-      "description": "Operator password."
+      "description": "Enter the operator password"
     },
     {
       "name": "member_id",
       "type": "string",
       "required": true,
       "redact": false,
-      "description": "Member ID to look up."
+      "description": "Enter the member ID to search for"
     }
   ],
   "outputs": [
@@ -42,14 +42,14 @@
       "name": "savings_balance",
       "type": "string",
       "redact": false,
-      "fromStep": "read-1",
-      "description": "The member's displayed savings balance."
+      "fromStep": "read-6",
+      "description": "Read the Savings Balance for member 12345"
     }
   ],
   "steps": [
     {
-      "id": "type-operator",
-      "intent": "Enter the operator ID",
+      "id": "type-1",
+      "intent": "Enter the operator ID to sign in",
       "risk": "safe",
       "action": {
         "type": "type",
@@ -58,11 +58,18 @@
         }
       },
       "target": {
-        "description": "Operator ID field (structural).",
+        "description": "textbox \"Operator ID\" — primary locator: role, with 3 fallback strategies",
         "strategies": [
           {
-            "kind": "css",
-            "selector": "input[name=\"op\"]"
+            "kind": "role",
+            "role": "textbox",
+            "name": "Operator ID",
+            "exact": false
+          },
+          {
+            "kind": "label",
+            "text": "Operator ID",
+            "exact": false
           },
           {
             "kind": "nearLabel",
@@ -72,22 +79,29 @@
       }
     },
     {
-      "id": "type-password",
+      "id": "type-2",
       "intent": "Enter the operator password",
       "risk": "safe",
       "action": {
         "type": "type",
         "value": {
-          "param": "operator_password"
+          "param": "password"
         },
         "secret": true
       },
       "target": {
-        "description": "Password field (structural); redacted param.",
+        "description": "textbox \"Password\" — primary locator: role, with 3 fallback strategies",
         "strategies": [
           {
-            "kind": "css",
-            "selector": "input[name=\"pw\"]"
+            "kind": "role",
+            "role": "textbox",
+            "name": "Password",
+            "exact": false
+          },
+          {
+            "kind": "label",
+            "text": "Password",
+            "exact": false
           },
           {
             "kind": "nearLabel",
@@ -97,30 +111,32 @@
       }
     },
     {
-      "id": "click-signin",
-      "intent": "Sign in",
+      "id": "click-3",
+      "intent": "Sign in to the servicing console",
       "risk": "safe",
       "action": {
         "type": "click"
       },
       "target": {
-        "description": "Sign In button by role+name.",
+        "description": "button \"Sign In\" — primary locator: role, with 2 fallback strategies",
         "strategies": [
           {
             "kind": "role",
             "role": "button",
             "name": "Sign In",
             "exact": false
+          },
+          {
+            "kind": "text",
+            "text": "Sign In",
+            "exact": false
           }
         ]
-      },
-      "checkpoint": {
-        "text": "Member Lookup"
       }
     },
     {
-      "id": "type-member",
-      "intent": "Enter the member ID",
+      "id": "type-4",
+      "intent": "Enter the member ID to search for",
       "risk": "safe",
       "action": {
         "type": "type",
@@ -129,7 +145,7 @@
         }
       },
       "target": {
-        "description": "Member ID field by role+name; label and structural selector are fallbacks.",
+        "description": "textbox \"Member ID\" — primary locator: role, with 3 fallback strategies",
         "strategies": [
           {
             "kind": "role",
@@ -139,28 +155,25 @@
           },
           {
             "kind": "label",
-            "text": "Member ID"
+            "text": "Member ID",
+            "exact": false
           },
           {
             "kind": "nearLabel",
             "label": "Member ID"
-          },
-          {
-            "kind": "css",
-            "selector": "input[name=\"memberId\"]"
           }
         ]
       }
     },
     {
-      "id": "click-search",
-      "intent": "Search for the member",
+      "id": "click-5",
+      "intent": "Search for member 12345",
       "risk": "safe",
       "action": {
         "type": "click"
       },
       "target": {
-        "description": "Search button by role+name; visible text fallback.",
+        "description": "button \"Search\" — primary locator: role, with 2 fallback strategies",
         "strategies": [
           {
             "kind": "role",
@@ -174,34 +187,30 @@
             "exact": false
           }
         ]
-      },
-      "checkpoint": {
-        "text": "Member Detail"
       }
     },
     {
-      "id": "read-1",
-      "intent": "Read the savings balance value",
+      "id": "read-6",
+      "intent": "Read the Savings Balance for member 12345",
       "risk": "safe",
       "action": {
         "type": "read"
       },
       "extractAs": "savings_balance",
       "target": {
-        "description": "Legacy label:value row - the value cell adjacent to the 'Savings Balance' label. nearLabel survives structural churn; xpath is the fallback.",
+        "description": "cell \"Savings Balance\" — primary locator: nearLabel, with 1 fallback strategies",
         "strategies": [
           {
             "kind": "nearLabel",
             "label": "Savings Balance"
-          },
-          {
-            "kind": "xpath",
-            "selector": "/html/body/div[2]/table/tr[4]/td[2]"
           }
         ]
       }
     }
   ],
+  "successCondition": {
+    "allOutputsPresent": true
+  },
   "globalOutcomes": [
     {
       "outcome": "SESSION_INTERSTITIAL",
@@ -248,15 +257,10 @@
       "message": "Backend system error."
     }
   ],
-  "successCondition": {
-    "text": "Member Detail",
-    "allOutputsPresent": true
-  },
   "provenance": {
-    "discoveredBy": "claude (illustrative golden - regenerate with `npm run discover`)",
-    "discoveredAt": "2026-08-19T00:00:00.000Z",
-    "runId": "golden-read-savings",
-    "redactionPolicyVersion": 1,
-    "notes": "Hand-authored golden matching the mock app, so replay demos run without an LLM. A real discovery run emits the same shape."
+    "discoveredBy": "claude-sonnet-4-5",
+    "discoveredAt": "2026-08-28T01:32:01.259Z",
+    "runId": "run-20260828T013137-phxq93",
+    "redactionPolicyVersion": 1
   }
 }

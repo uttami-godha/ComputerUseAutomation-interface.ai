@@ -232,6 +232,24 @@ async function main(): Promise<void> {
         "capability",
       );
 
+    const existing =
+      store.load(
+        capabilityId,
+      );
+
+    if (
+      existing?.status ===
+        "approved" &&
+      !args.flags.has(
+        "force",
+      )
+    ) {
+      throw new Error(
+        `capability ${capabilityId} is already approved; ` +
+          `a fresh discovery run would overwrite it. Pass --force to proceed anyway.`,
+      );
+    }
+
     const name =
       required(
         args,
@@ -540,6 +558,7 @@ Commands:
     [--out <dir>]
     [--headed]
     [--escalate]
+    [--force]  (required to overwrite an already-approved capability)
 
   replay
     --capability <id>

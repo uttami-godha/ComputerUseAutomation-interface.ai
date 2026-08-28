@@ -119,6 +119,41 @@ export class DiscoveryEngine {
       entryPath: opts.target.entryPath,
     };
 
+    // Discovery must not assume the surface already knows where to start -
+    // navigate to the recorded entry point ourselves rather than hoping the
+    // model can guess an allowlisted URL from a blank page.
+    const entryUrl = opts.target.baseUrl + opts.target.entryPath;
+    const entryNavAllowed = this.guardrails.checkNavigation(entryUrl);
+
+    if (!entryNavAllowed.allowed) {
+      return {
+        status: "failed",
+        summary: `entry navigation blocked: ${
+          entryNavAllowed.reason ?? "not allowlisted"
+        }`,
+        steps: 0,
+      };
+    }
+
+    const entryNav = await this.surface.perform({
+      type: "navigate",
+      url: entryUrl,
+    });
+
+    if (!entryNav.ok) {
+      return {
+        status: "failed",
+        summary: `failed to reach entry point: ${
+          entryNav.message ?? "navigation failed"
+        }`,
+        steps: 0,
+      };
+    }
+
+    this.evidence.event("discovery_entry_navigate", {
+      url: entryUrl,
+    });
+
     const recorder = new Recorder();
 
     let obs = this.trackObservation(await this.surface.observe());

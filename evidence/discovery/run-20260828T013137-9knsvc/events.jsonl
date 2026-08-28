@@ -1,0 +1,4 @@
+{"t":"2026-08-28T01:31:37.430Z","type":"discovery_entry_navigate","url":"http://localhost:7799/t/cu-a/"}
+{"t":"2026-08-28T01:31:37.526Z","type":"discovery_start","goal":"Sign in to the servicing console, find member 12345, read the Savings Balance, and finish.","capabilityId":"servicing.read_savings_balance","name":"Read member savings balance","model":"claude-sonnet-4-5","target":{"surfaceKind":"legacy-web","appId":"MemberServicing","vendorProduct":"MemberServicing","tenantId":"cu-a","baseUrl":"http://localhost:7799","entryPath":"/t/cu-a/"}}
+{"t":"2026-08-28T01:31:58.532Z","type":"discovery_read","output":"savings_balance","value":"$4,210.55"}
+{"t":"2026-08-28T01:32:01.259Z","type":"discovery_success","capabilityId":"servicing.read_savings_balance","steps":7,"summary":"Signed in as op-jsmith, found member 12345 (Jamie Smith), and read Savings Balance: $4,210.55"}

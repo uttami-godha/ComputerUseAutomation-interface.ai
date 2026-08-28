@@ -1,0 +1,10 @@
+{"t":"2026-08-28T01:32:09.703Z","type":"replay_start","capabilityId":"servicing.read_savings_balance","version":1,"status":"draft","tenantId":"cu-a"}
+{"t":"2026-08-28T01:32:09.731Z","type":"replay_entry_navigate","url":"http://localhost:7799/t/cu-a/"}
+{"t":"2026-08-28T01:32:09.731Z","type":"step_start","id":"type-1","intent":"Enter the operator ID to sign in","action":"type","risk":"safe"}
+{"t":"2026-08-28T01:32:09.816Z","type":"step_start","id":"type-2","intent":"Enter the operator password","action":"type","risk":"safe"}
+{"t":"2026-08-28T01:32:09.838Z","type":"step_start","id":"click-3","intent":"Sign in to the servicing console","action":"click","risk":"safe"}
+{"t":"2026-08-28T01:32:09.948Z","type":"step_start","id":"type-4","intent":"Enter the member ID to search for","action":"type","risk":"safe"}
+{"t":"2026-08-28T01:32:09.973Z","type":"step_start","id":"click-5","intent":"Search for member 12345","action":"click","risk":"safe"}
+{"t":"2026-08-28T01:32:10.088Z","type":"step_start","id":"read-6","intent":"Read the Savings Balance for member 12345","action":"read","risk":"safe"}
+{"t":"2026-08-28T01:32:10.149Z","type":"extracted","as":"savings_balance","redacted":false}
+{"t":"2026-08-28T01:32:10.153Z","type":"replay_success","outputs":{"savings_balance":"$4,210.55"}}

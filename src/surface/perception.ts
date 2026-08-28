@@ -16,6 +16,11 @@ type RawElement = {
   placeholder?: string;
   type?: string;
   href?: string;
+  // For a table "value" cell (role "cell"): the adjacent label cell's text,
+  // e.g. "Savings Balance" for the cell holding "$4,210.55". This is what
+  // lets discovery record a nearLabel strategy for legacy label:value rows
+  // instead of having no way to target the value at all.
+  label?: string;
 };
 
 export async function perceive(
@@ -30,7 +35,7 @@ export async function perceive(
     .catch(() => "");
 
   const raw = await page.evaluate(() => {
-    const nodes = Array.from(
+    const interactive = Array.from(
       document.querySelectorAll(
         [
           "a",
@@ -42,6 +47,30 @@ export async function perceive(
         ].join(","),
       ),
     );
+
+    // Legacy apps commonly render data as <tr><td>Label</td><td>Value</td></tr>
+    // with no interactive semantics at all - without this, discovery has no
+    // element ref it can legitimately point a "read" at for that value.
+    const valueCells = Array.from(
+      document.querySelectorAll("td, th"),
+    ).filter((cell) => {
+      const prev = cell.previousElementSibling;
+
+      if (!prev || !/^(TD|TH)$/.test(prev.tagName)) {
+        return false;
+      }
+
+      if (cell.querySelector("a, button, input, select, textarea")) {
+        return false;
+      }
+
+      return (
+        !!(cell.textContent ?? "").trim() &&
+        !!(prev.textContent ?? "").trim()
+      );
+    });
+
+    const nodes = [...interactive, ...valueCells];
 
     function visible(el: Element): boolean {
       const h = el as HTMLElement;
@@ -102,6 +131,7 @@ export async function perceive(
 
       const tag = el.tagName.toLowerCase();
 
+      if (tag === "td" || tag === "th") return "cell";
       if (tag === "a") return "link";
       if (tag === "button") return "button";
       if (tag === "select") return "combobox";
@@ -129,16 +159,28 @@ export async function perceive(
       return tag;
     }
 
+    function cellLabel(el: Element): string | undefined {
+      const prev = el.previousElementSibling;
+      const text = prev?.textContent?.trim();
+      return text || undefined;
+    }
+
     return nodes
       .filter(visible)
       .slice(0, 80)
       .map((el) => {
         const h = el as HTMLInputElement;
+        const isValueCell =
+          el.tagName === "TD" || el.tagName === "TH";
+        const label = isValueCell
+          ? cellLabel(el)
+          : undefined;
 
         return {
           role: roleOf(el),
-          name: labelFor(el),
+          name: label ?? labelFor(el),
           text: (el.textContent ?? "").trim(),
+          label,
           value:
             "value" in h
               ? String(h.value ?? "")
@@ -187,6 +229,20 @@ function strategiesFor(
   el: RawElement,
 ): LocatorStrategy[] {
   const out: LocatorStrategy[] = [];
+
+  // A "cell" element's name is the *adjacent* label cell's text, not its own
+  // accessible name, so a role-based locator would resolve the wrong cell.
+  // nearLabel is the correct (and only) strategy for this legacy pattern.
+  if (el.role === "cell") {
+    if (el.label) {
+      out.push({
+        kind: "nearLabel",
+        label: el.label,
+      });
+    }
+
+    return dedupe(out);
+  }
 
   if (el.role && el.name) {
     out.push({

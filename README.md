@@ -246,20 +246,19 @@ node src/cli.ts schema
 
 Each run creates an evidence directory containing an append-only event stream and result data. Browser-backed runs may additionally capture step screenshots and failure snapshots.
 
-The committed `evidence/` directory demonstrates:
+`evidence/` contains two kinds of demonstration:
 
-- successful replay;
-- a legitimate not-found business outcome;
-- recovery from an idle-session interstitial;
-- a gated risky step → escalation → human resume → success.
+- **`evidence/discovery/` and `evidence/replay/`** — real end-to-end runs: a genuine Claude-driven discovery session against the live mock app (screenshots, event log, the discovered artifact), and real browser-driven replays covering success, a not-found business outcome, a recovered idle-session interstitial, cross-tenant reuse, a risk-gated failure, an `--allow-risky` override, and a full human-escalation round trip (real control transfer, live screenshot, simulated operator resume, automation completing the flow).
+- **`evidence/replay-success/`, `evidence/replay-business-outcome/`, `evidence/replay-recoverable-interstitial/`, `evidence/replay-cross-tenant-cu-b/`** — the same replay engine driving a scripted surface instead of a browser, fully offline and reproducible. Regenerate with `npm run gen-evidence`.
 
-For the full browser/LLM demonstration:
+To regenerate the real evidence yourself (requires a mock app running and `ANTHROPIC_API_KEY` set):
 
 ```bash
-npm run gen-real-evidence
+npm run mock            # in one terminal
+npm run gen-real-evidence   # in another (bash; on Windows use WSL, or run the discover/replay commands above manually)
 ```
 
-That command performs a real discovery and several browser-driven replay cases and writes them under `evidence/`.
+Note: discovery refuses to overwrite an already-`approved` capability artifact unless you pass `--force`, so re-running discovery against `servicing.read_savings_balance` (already approved) will error out safely instead of silently clobbering it — back it up or add `--force` if you intend to replace it.
 
 ## Running without live services
 

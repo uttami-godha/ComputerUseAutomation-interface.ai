@@ -170,7 +170,12 @@ export function discoveryTools(): Tool[] {
 
 export function formatObservation(obs: Observation, goal: string): string {
   const lines = obs.elements.map((e) => {
-    const v = e.value ? ` value="${e.value}"` : "";
+    const v = e.value
+      ? ` value="${e.value}"`
+      : e.text
+        ? ` text="${e.text}"`
+        : "";
+
     return `  [${e.ref}] ${e.role} name="${e.name}"${v}`;
   });
 

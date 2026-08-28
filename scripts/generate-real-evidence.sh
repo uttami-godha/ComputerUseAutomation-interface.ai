@@ -70,6 +70,7 @@ node src/cli.ts discover \
   --entry-path "/t/cu-a/" \
   --tenant "cu-a" \
   --out evidence \
+  --force \
   ${HEADED_FLAG} \
   --param operator_id=op-jsmith \
   --param operator_password=demo-not-a-real-secret \

@@ -26,7 +26,6 @@
     "irreversibleIntents": [
       "delete",
       "remove",
-      "submit",
       "approve",
       "update",
       "save",
