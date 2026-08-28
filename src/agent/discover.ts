@@ -20,6 +20,7 @@ import { HumanInTheLoop } from "../escalation/handoff.ts";
 import {
   AnthropicClient,
   type ContentBlock,
+  type Message,
   type ToolResultBlock,
 } from "../llm/anthropic.ts";
 import {
@@ -116,7 +117,7 @@ export class DiscoveryEngine {
 
     let obs = this.trackObservation(await this.surface.observe());
 
-    const messages: Array<Record<string, unknown>> = [
+    const messages: Message[] = [
       {
         role: "user",
         content: this.obsContent(obs, goal),
@@ -157,7 +158,6 @@ export class DiscoveryEngine {
       }
 
       const response = await this.llm.message({
-        model: this.model,
         system: SYSTEM_PROMPT,
         tools: discoveryTools(),
         messages,

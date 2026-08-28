@@ -1,0 +1,13 @@
+{
+  "status": "business_outcome",
+  "capabilityId": "servicing.read_savings_balance",
+  "runId": "run-20260828T010003-n5zl4a",
+  "drift": [],
+  "recovered": [],
+  "stepsRun": 5,
+  "businessOutcome": {
+    "outcome": "NO_SUCH_MEMBER",
+    "message": "No member exists for the supplied id.",
+    "step": "click-search"
+  }
+}

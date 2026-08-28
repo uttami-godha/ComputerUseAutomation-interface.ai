@@ -9,7 +9,7 @@ export function nowIso(): string {
 export function runId(
   prefix = "run",
 ): string {
-  const stamp =
+  const digits =
     new Date()
       .toISOString()
       .replace(
@@ -17,6 +17,12 @@ export function runId(
         "",
       )
       .slice(0, 14);
+
+  // Split date/time with a letter (not a digit/space/hyphen) so neither
+  // chunk is a run of 8+ digits - the redaction policy masks digit runs
+  // that long as card/account numbers, even across spaces and hyphens.
+  const stamp =
+    `${digits.slice(0, 8)}T${digits.slice(8)}`;
 
   const random =
     Math.random()

@@ -1,0 +1,11 @@
+{
+  "status": "success",
+  "capabilityId": "servicing.read_savings_balance",
+  "runId": "run-20260828T010003-gec495",
+  "drift": [],
+  "recovered": [],
+  "stepsRun": 6,
+  "outputs": {
+    "savings_balance": "$4,210.55"
+  }
+}

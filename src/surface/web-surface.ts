@@ -268,7 +268,7 @@ export class WebSurface implements Surface {
             code:
               "UNSUPPORTED_ACTION",
             message:
-              `unsupported action: ${action.type}`,
+              "unsupported action",
           };
       }
     } catch (err) {

@@ -99,6 +99,7 @@ export type OutcomeRule = {
     strategies?: LocatorStrategy[];
     maxRetries?: number;
     waitMs?: number;
+    waitForText?: string;
   };
 
   message?: string;

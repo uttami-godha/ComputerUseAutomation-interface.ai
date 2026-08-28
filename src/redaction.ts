@@ -14,6 +14,12 @@ export class Redactor {
   private config:
     Policy["redaction"];
 
+  // Literal secret values (e.g. a typed password) registered at runtime.
+  // These never match a regex pattern reliably, so they're masked by exact
+  // substring match instead. Keyed by value -> name so redact() can find the
+  // longest match first and avoid partial-masking overlapping secrets.
+  private secrets = new Map<string, string>();
+
   constructor(
     config:
       Policy["redaction"],
@@ -32,10 +38,35 @@ export class Redactor {
       );
   }
 
+  registerSecret(
+    name: string,
+    value: string,
+  ): void {
+    if (!value) return;
+    this.secrets.set(value, name);
+  }
+
   redact(
     value: string,
   ): string {
     let out = value;
+
+    const secretValues = [
+      ...this.secrets.keys(),
+    ].sort((a, b) => b.length - a.length);
+
+    for (const secretValue of secretValues) {
+      const name = this.secrets.get(secretValue)!;
+
+      out = out
+        .split(secretValue)
+        .join(
+          this.config.mask.replace(
+            "{name}",
+            name,
+          ),
+        );
+    }
 
     for (
       const pattern

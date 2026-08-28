@@ -111,10 +111,7 @@ export class ReplayEngine {
       case "navigate":
         return {
           type: "navigate",
-          url: applyTemplate(
-            asString(valueOf(a.url, params)),
-            params,
-          ),
+          url: applyTemplate(a.url, params),
         };
 
       case "click":
@@ -137,7 +134,7 @@ export class ReplayEngine {
       case "press":
         return {
           type: "press",
-          key: a.key,
+          key: a.key ?? "",
         };
 
       case "read":
