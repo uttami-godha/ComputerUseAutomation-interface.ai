@@ -50,6 +50,7 @@ import {
 import {
   parseKeyValue,
   runId,
+  sleep,
 } from "./util.ts";
 
 type Args = {
@@ -381,6 +382,17 @@ async function main(): Promise<void> {
         process.exitCode = 1;
       }
     } finally {
+      if (
+        args.flags.has(
+          "headed",
+        )
+      ) {
+        // Leave the window up for a moment - otherwise it closes the
+        // instant the run finishes, before a human watching has a chance
+        // to see the final state.
+        await sleep(4000);
+      }
+
       await hitl?.close();
       await surface.close();
     }
@@ -526,6 +538,17 @@ async function main(): Promise<void> {
         process.exitCode = 1;
       }
     } finally {
+      if (
+        args.flags.has(
+          "headed",
+        )
+      ) {
+        // Leave the window up for a moment - otherwise it closes the
+        // instant the run finishes, before a human watching has a chance
+        // to see the final state.
+        await sleep(4000);
+      }
+
       await hitl?.close();
       await surface.close();
     }

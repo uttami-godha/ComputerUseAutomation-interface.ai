@@ -18,6 +18,7 @@ import type {
 export type WebSurfaceOptions = {
   headed?: boolean;
   timeoutMs?: number;
+  slowMoMs?: number;
 };
 
 export class WebSurface implements Surface {
@@ -45,8 +46,15 @@ export class WebSurface implements Surface {
   ): Promise<WebSurface> {
     const timeoutMs = opts.timeoutMs ?? 10_000;
 
+    // Headed mode exists so a human can watch; at full speed the whole run
+    // flashes by in well under a second. Default to a visible pace unless
+    // the caller asked for something else.
+    const slowMo =
+      opts.slowMoMs ?? (opts.headed ? 400 : 0);
+
     const browser = await chromium.launch({
       headless: !opts.headed,
+      slowMo,
     });
 
     const context = await browser.newContext({
@@ -60,6 +68,12 @@ export class WebSurface implements Surface {
 
     page.setDefaultTimeout(timeoutMs);
     page.setDefaultNavigationTimeout(timeoutMs);
+
+    if (opts.headed) {
+      // The new window doesn't reliably take focus from the terminal that
+      // launched it, so a human watching can easily miss it entirely.
+      await page.bringToFront();
+    }
 
     return new WebSurface(
       browser,

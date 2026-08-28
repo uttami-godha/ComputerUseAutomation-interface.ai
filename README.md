@@ -268,7 +268,7 @@ The repository also has a fully offline harness:
 npm test
 ```
 
-It exercises the replay engine, artifact validation, outcome taxonomy, policy/guardrails, redaction, tenant merge/canonicalization, capability catalog, recovery, drift, and escalation using a scripted `FakeSurface`.
+It exercises artifact validation, the replay engine's success and business-outcome paths, outcome-rule matching, redaction, tenant-override merging, and URL canonicalization — using a scripted `ScriptedSurface` in place of a browser.
 
 To regenerate the committed engine-level evidence:
 
@@ -288,8 +288,8 @@ src/
   guardrails.ts, redaction.ts, config.ts, evidence/, catalog.ts, cli.ts
   mock-app/     the legacy servicing console (zero-dep Node http)
 artifacts/      committed golden capabilities + a cu-b tenant override
-evidence/       committed end-to-end demonstration
-tests/          in-sandbox harness + scripted surface + evidence generator
+evidence/       real discovery/replay runs + offline engine-level demonstrations
+tests/          offline harness + scripted surface + evidence generator
 config/         policy.json (allowlist, risk rules, redaction patterns)
 ```
 
@@ -297,4 +297,3 @@ config/         policy.json (allowlist, risk rules, redaction patterns)
 
 - **One runtime dependency: Playwright.** The Anthropic client is a thin `fetch` wrapper, the mock app is built on Node's `http`, and artifact validation is explicit. A tiny, auditable dependency surface is a deliberate choice for regulated environments (REPORT §1).
 - **No build step.** Node's native TypeScript type-stripping runs `.ts` directly. The code uses only erasable TypeScript (no enums / parameter properties), so `node src/cli.ts ...` just works.
-- If you see `node_modules/playwright/index.mjs` re-exporting a global path, that's a dev shim used only in the author's locked-down sandbox; a normal `npm install` replaces it. It is gitignored.
