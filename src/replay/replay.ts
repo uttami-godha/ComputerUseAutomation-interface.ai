@@ -81,13 +81,25 @@ function asString(v: unknown): string {
 }
 
 export class ReplayEngine {
+  private surface: Surface;
+  private guardrails: Guardrails;
+  private evidence: Evidence;
+  private redactor: Redactor;
+  private hitl?: HumanInTheLoop;
+
   constructor(
-    private surface: Surface,
-    private guardrails: Guardrails,
-    private evidence: Evidence,
-    private redactor: Redactor,
-    private hitl?: HumanInTheLoop,
-  ) {}
+    surface: Surface,
+    guardrails: Guardrails,
+    evidence: Evidence,
+    redactor: Redactor,
+    hitl?: HumanInTheLoop,
+  ) {
+    this.surface = surface;
+    this.guardrails = guardrails;
+    this.evidence = evidence;
+    this.redactor = redactor;
+    this.hitl = hitl;
+  }
 
   private actionFor(
     step: Step,
@@ -113,7 +125,7 @@ export class ReplayEngine {
       case "type":
         return {
           type: "type",
-          value: asString(valueOf(a.value, params)),
+          text: asString(valueOf(a.value, params)),
         };
 
       case "select":
@@ -332,7 +344,7 @@ export class ReplayEngine {
 
         escalation.requested = true;
 
-        const result = await this.hitl.intervene({
+        const result = await this.hitl.request({
           runId: this.evidence.runId,
           capabilityId: artifact.capabilityId,
           goal: artifact.description,
@@ -356,13 +368,11 @@ export class ReplayEngine {
 
         escalation.resolved = true;
         escalation.note = result.note;
-        escalation.stateChanged = result.stateChanged;
 
         this.evidence.event(
           "intervention_resolved",
           {
             note: result.note,
-            stateChanged: result.stateChanged,
           },
         );
 

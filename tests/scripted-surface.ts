@@ -35,7 +35,10 @@ export type ScriptedScenario = {
 export class ScriptedSurface
   implements Surface
 {
+  readonly kind = "web" as const;
+
   private stateId: string;
+  private scenario: ScriptedScenario;
 
   readonly actions: {
     action: Action;
@@ -43,8 +46,9 @@ export class ScriptedSurface
   }[] = [];
 
   constructor(
-    private scenario: ScriptedScenario,
+    scenario: ScriptedScenario,
   ) {
+    this.scenario = scenario;
     this.stateId = scenario.initial;
 
     if (!scenario.states[this.stateId]) {

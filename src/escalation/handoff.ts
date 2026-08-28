@@ -12,6 +12,10 @@ export type Intervention = {
   reason: string;
   detail?: string;
   suggested?: string;
+  runId?: string;
+  url?: string;
+  screenshotPath?: string;
+  visibleTextExcerpt?: string;
 };
 
 export type InterventionResult = {
@@ -33,12 +37,19 @@ export class HumanInTheLoop {
   private current?: Intervention;
   private server?: http.Server;
   private resumeResolve?: (note?: string) => void;
+  private surface: Surface;
+  private evidence: Evidence;
+  private port: number;
 
   constructor(
-    private surface: Surface,
-    private evidence: Evidence,
-    private port = 7788,
-  ) {}
+    surface: Surface,
+    evidence: Evidence,
+    port = 7788,
+  ) {
+    this.surface = surface;
+    this.evidence = evidence;
+    this.port = port;
+  }
 
   owner(): ControlOwner {
     return this.control;
@@ -94,16 +105,18 @@ export class HumanInTheLoop {
         url: a.value,
       });
     } else if (a.kind === "click_text") {
-      await this.surface.perform({
-        type: "click",
-        strategies: [
+      await this.surface.perform(
+        {
+          type: "click",
+        },
+        [
           {
             kind: "text",
             text: a.value,
             exact: false,
           },
         ],
-      });
+      );
     }
 
     this.evidence.event("operator_action", {
@@ -252,6 +265,14 @@ export class HumanInTheLoop {
     &nbsp;
     <b>Goal:</b> ${escapeHtml(iv?.goal ?? "-")}
   </p>
+
+  ${
+    iv?.visibleTextExcerpt
+      ? `<p><b>Visible text at handoff:</b><br><code>${escapeHtml(
+          iv.visibleTextExcerpt,
+        )}</code></p>`
+      : ""
+  }
 
   <p><b>Live session</b> (same page the automation was driving):</p>
 

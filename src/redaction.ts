@@ -11,10 +11,15 @@ export class Redactor {
   private patterns:
     CompiledPattern[];
 
+  private config:
+    Policy["redaction"];
+
   constructor(
-    private config:
+    config:
       Policy["redaction"],
   ) {
+    this.config = config;
+
     this.patterns =
       config.patterns.map(
         (pattern) => ({

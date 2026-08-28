@@ -1,177 +1,140 @@
-import type {
-  RiskClass,
-  Step,
-} from "./artifact/schema.ts";
-import type {
-  Policy,
-} from "./config.ts";
+import type { RiskClass } from "./artifact/schema.ts";
+import type { Policy } from "./config.ts";
 
-export type GuardrailDecision =
-  | {
-      allowed: true;
-      risk: RiskClass;
-      handling: "allow";
+export type AllowDecision = {
+  allowed: boolean;
+  reason?: string;
+};
+
+export type HandlingDecision =
+  | { verdict: "allow" }
+  | { verdict: "block"; reason: string };
+
+export type ClassifyRiskInput = {
+  actionType: string;
+  intent?: string;
+  controlText?: string;
+};
+
+export type HandlingContext = {
+  approved: boolean;
+  allowRisky: boolean;
+  confirmed: boolean;
+};
+
+function normalize(value: string): string {
+  return value.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+// Shared by discovery (live classification of the model's next action) and
+// replay (re-classification of a recorded step) so both paths gate risk
+// identically. An irreversible match is never downgraded.
+export class Guardrails {
+  private policy: Policy;
+
+  constructor(policy: Policy) {
+    this.policy = policy;
+  }
+
+  classifyRisk(input: ClassifyRiskInput): RiskClass {
+    const combined = normalize(
+      `${input.intent ?? ""} ${input.controlText ?? ""}`,
+    );
+
+    if (
+      this.policy.risk.irreversibleIntents.some((x) =>
+        combined.includes(normalize(x)),
+      )
+    ) {
+      return "irreversible";
     }
-  | {
-      allowed: false;
-      risk: RiskClass;
-      handling:
-        | "require_approval"
-        | "require_confirmation";
-      reason: string;
-    };
 
-export function classifyRisk(
-  step: Step,
-  policy: Policy,
-): RiskClass {
-  const intent =
-    normalize(step.intent ?? "");
-
-  const description =
-    normalize(
-      step.target?.description ?? "",
-    );
-
-  const combined =
-    `${intent} ${description}`;
-
-  if (
-    policy.risk.irreversibleIntents
-      .some((x) =>
-        combined.includes(
-          normalize(x),
-        ),
+    if (
+      this.policy.risk.riskyIntents.some((x) =>
+        combined.includes(normalize(x)),
+      ) ||
+      this.policy.risk.riskyControlText.some((x) =>
+        combined.includes(normalize(x)),
       )
-  ) {
-    return "irreversible";
+    ) {
+      return "risky";
+    }
+
+    return "safe";
   }
 
-  if (
-    policy.risk.riskyIntents
-      .some((x) =>
-        combined.includes(
-          normalize(x),
-        ),
+  checkActionType(actionType: string): AllowDecision {
+    if (!this.policy.allowlist.actionTypes.includes(actionType)) {
+      return {
+        allowed: false,
+        reason: `action type not allowed: ${actionType}`,
+      };
+    }
+
+    return { allowed: true };
+  }
+
+  checkNavigation(url: string): AllowDecision {
+    let parsed: URL;
+
+    try {
+      parsed = new URL(url);
+    } catch {
+      return {
+        allowed: false,
+        reason: `invalid URL: ${url}`,
+      };
+    }
+
+    if (!this.policy.allowlist.origins.includes(parsed.origin)) {
+      return {
+        allowed: false,
+        reason: `origin not allowlisted: ${parsed.origin}`,
+      };
+    }
+
+    if (
+      !this.policy.allowlist.pathPrefixes.some((prefix) =>
+        parsed.pathname.startsWith(prefix),
       )
-  ) {
-    return "risky";
+    ) {
+      return {
+        allowed: false,
+        reason: `path not allowlisted: ${parsed.pathname}`,
+      };
+    }
+
+    return { allowed: true };
   }
 
-  if (
-    policy.risk.riskyControlText
-      .some((x) =>
-        combined.includes(
-          normalize(x),
-        ),
-      )
-  ) {
-    return "risky";
-  }
+  decideHandling(
+    risk: RiskClass,
+    ctx: HandlingContext,
+  ): HandlingDecision {
+    const handling = this.policy.handling[risk];
 
-  // A recorded risk classification may make a step
-  // stricter, but inference must never downgrade it.
-  if (
-    step.risk === "irreversible"
-  ) {
-    return "irreversible";
-  }
+    if (handling === "allow") {
+      return { verdict: "allow" };
+    }
 
-  if (step.risk === "risky") {
-    return "risky";
-  }
+    if (risk === "irreversible") {
+      if (ctx.confirmed) return { verdict: "allow" };
 
-  return "safe";
-}
+      return {
+        verdict: "block",
+        reason: "irreversible action requires explicit confirmation",
+      };
+    }
 
-export function checkGuardrails(
-  step: Step,
-  policy: Policy,
-): GuardrailDecision {
-  if (
-    !policy.allowlist.actionTypes
-      .includes(step.action.type)
-  ) {
+    // risky
+    if (ctx.approved || ctx.allowRisky) {
+      return { verdict: "allow" };
+    }
+
     return {
-      allowed: false,
-      risk: "irreversible",
-      handling:
-        "require_confirmation",
+      verdict: "block",
       reason:
-        `action type not allowed: ${step.action.type}`,
+        "risky action requires an approved artifact or --allow-risky",
     };
   }
-
-  const risk =
-    classifyRisk(step, policy);
-
-  const handling =
-    policy.handling[risk];
-
-  if (handling === "allow") {
-    return {
-      allowed: true,
-      risk,
-      handling,
-    };
-  }
-
-  return {
-    allowed: false,
-    risk,
-    handling,
-    reason:
-      `${risk} action requires ${
-        handling ===
-        "require_confirmation"
-          ? "confirmation"
-          : "approval"
-      }`,
-  };
-}
-
-export function assertUrlAllowed(
-  value: string,
-  policy: Policy,
-): void {
-  let url: URL;
-
-  try {
-    url = new URL(value);
-  } catch {
-    throw new Error(
-      `invalid URL: ${value}`,
-    );
-  }
-
-  if (
-    !policy.allowlist.origins
-      .includes(url.origin)
-  ) {
-    throw new Error(
-      `navigation blocked by policy: origin ${url.origin} is not allowlisted`,
-    );
-  }
-
-  if (
-    !policy.allowlist.pathPrefixes
-      .some((prefix) =>
-        url.pathname.startsWith(
-          prefix,
-        ),
-      )
-  ) {
-    throw new Error(
-      `navigation blocked by policy: path ${url.pathname} is not allowlisted`,
-    );
-  }
-}
-
-function normalize(
-  value: string,
-): string {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, " ");
 }

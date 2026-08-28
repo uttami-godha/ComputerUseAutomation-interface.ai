@@ -15,9 +15,11 @@ export type CapabilitySummary = {
 };
 
 export class CapabilityCatalog {
-  constructor(
-    private store: ArtifactStore,
-  ) {}
+  private store: ArtifactStore;
+
+  constructor(store: ArtifactStore) {
+    this.store = store;
+  }
 
   list(): CapabilitySummary[] {
     return this.store.list().map((artifact) =>

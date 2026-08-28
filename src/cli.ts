@@ -3,6 +3,9 @@
 import {
   readFileSync,
 } from "node:fs";
+import {
+  join,
+} from "node:path";
 
 import {
   ArtifactStore,
@@ -21,6 +24,9 @@ import {
   loadConfig,
 } from "./config.ts";
 import {
+  Guardrails,
+} from "./guardrails.ts";
+import {
   Redactor,
 } from "./redaction.ts";
 import {
@@ -33,7 +39,7 @@ import {
   AnthropicClient,
 } from "./llm/anthropic.ts";
 import {
-  DiscoveryAgent,
+  DiscoveryEngine,
 } from "./agent/discover.ts";
 import {
   ReplayEngine,
@@ -43,6 +49,7 @@ import {
 } from "./escalation/handoff.ts";
 import {
   parseKeyValue,
+  runId,
 } from "./util.ts";
 
 type Args = {
@@ -269,11 +276,16 @@ async function main(): Promise<void> {
         config.policy.redaction,
       );
 
+    const guardrails =
+      new Guardrails(
+        config.policy,
+      );
+
     const evidence =
       new Evidence(
-        out,
-        "discovery",
+        join(out, "discovery", runId()),
         redactor,
+        true,
       );
 
     const llm =
@@ -282,37 +294,49 @@ async function main(): Promise<void> {
         config.anthropicModel,
       );
 
+    const hitl =
+      args.flags.has(
+        "escalate",
+      )
+        ? new HumanInTheLoop(
+            surface,
+            evidence,
+          )
+        : undefined;
+
     const agent =
-      new DiscoveryAgent(
+      new DiscoveryEngine(
         surface,
-        llm,
+        guardrails,
         evidence,
-        config.policy,
+        redactor,
+        llm,
+        config.anthropicModel,
+        hitl,
       );
 
     try {
       const result =
-        await agent.run({
+        await agent.run(
           goal,
-          capabilityId,
-          name,
-          params: params(args),
-          target: {
-            surfaceKind:
-              "legacy-web",
-            appId:
-              "MemberServicing",
-            vendorProduct:
-              "MemberServicing",
-            tenantId,
-            baseUrl,
-            entryPath,
+          {
+            capabilityId,
+            name,
+            target: {
+              surfaceKind:
+                "legacy-web",
+              appId:
+                "MemberServicing",
+              vendorProduct:
+                "MemberServicing",
+              tenantId,
+              baseUrl,
+              entryPath,
+            },
+            policyVersion:
+              config.policy.version,
           },
-          model:
-            config.anthropicModel,
-          policyVersion:
-            config.policy.version,
-        });
+        );
 
       if (
         result.artifact
@@ -332,11 +356,12 @@ async function main(): Promise<void> {
 
       if (
         result.status !==
-        "completed"
+        "success"
       ) {
         process.exitCode = 1;
       }
     } finally {
+      await hitl?.close();
       await surface.close();
     }
 
@@ -413,11 +438,16 @@ async function main(): Promise<void> {
         config.policy.redaction,
       );
 
+    const guardrails =
+      new Guardrails(
+        config.policy,
+      );
+
     const evidence =
       new Evidence(
-        out,
-        "replay",
+        join(out, "replay", runId()),
         redactor,
+        true,
       );
 
     const hitl =
@@ -433,8 +463,9 @@ async function main(): Promise<void> {
     const replay =
       new ReplayEngine(
         surface,
+        guardrails,
         evidence,
-        config.policy,
+        redactor,
         hitl,
       );
 
@@ -443,6 +474,21 @@ async function main(): Promise<void> {
         await replay.run(
           artifact,
           params(args),
+          {
+            tenantId,
+            allowRisky:
+              args.flags.has(
+                "allow-risky",
+              ),
+            confirm:
+              args.flags.has(
+                "confirm",
+              ),
+            escalateOnFailure:
+              args.flags.has(
+                "escalate",
+              ),
+          },
         );
 
       console.log(
@@ -455,7 +501,7 @@ async function main(): Promise<void> {
 
       if (
         result.status ===
-        "failed"
+        "failure"
       ) {
         process.exitCode = 1;
       }
@@ -487,10 +533,10 @@ Commands:
     --base-url <url>
     [--entry-path <path>]
     [--tenant <id>]
-    [--param name=value ...]
     [--policy <file>]
     [--out <dir>]
     [--headed]
+    [--escalate]
 
   replay
     --capability <id>
@@ -500,6 +546,8 @@ Commands:
     [--policy <file>]
     [--out <dir>]
     [--headed]
+    [--allow-risky]
+    [--confirm]
     [--escalate]
 
   capabilities

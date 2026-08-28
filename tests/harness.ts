@@ -28,6 +28,9 @@ import {
   loadPolicy,
 } from "../src/config.ts";
 import {
+  Guardrails,
+} from "../src/guardrails.ts";
+import {
   Redactor,
 } from "../src/redaction.ts";
 import {
@@ -354,7 +357,7 @@ await test(
     const replay =
       new ReplayEngine(
         surface,
-        policy,
+        new Guardrails(policy),
         evidence,
         redactor,
       );
@@ -466,7 +469,7 @@ await test(
     const replay =
       new ReplayEngine(
         surface,
-        policy,
+        new Guardrails(policy),
         evidence,
         redactor,
       );

@@ -21,12 +21,24 @@ export type WebSurfaceOptions = {
 };
 
 export class WebSurface implements Surface {
+  readonly kind = "web" as const;
+
+  private browser: Browser;
+  private context: BrowserContext;
+  private page: Page;
+  private timeoutMs: number;
+
   private constructor(
-    private browser: Browser,
-    private context: BrowserContext,
-    private page: Page,
-    private timeoutMs: number,
-  ) {}
+    browser: Browser,
+    context: BrowserContext,
+    page: Page,
+    timeoutMs: number,
+  ) {
+    this.browser = browser;
+    this.context = context;
+    this.page = page;
+    this.timeoutMs = timeoutMs;
+  }
 
   static async create(
     opts: WebSurfaceOptions = {},

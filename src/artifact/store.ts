@@ -10,7 +10,10 @@ import { join } from "node:path";
 import type { Artifact, TenantOverride } from "./schema.ts";
 
 export class ArtifactStore {
-  constructor(private root = "artifacts") {
+  private root: string;
+
+  constructor(root = "artifacts") {
+    this.root = root;
     mkdirSync(this.root, { recursive: true });
     mkdirSync(join(this.root, "overrides"), { recursive: true });
   }
@@ -23,8 +26,12 @@ export class ArtifactStore {
     );
   }
 
-  load(capabilityId: string): Artifact {
-    return this.loadFile(join(this.root, `${capabilityId}.json`));
+  load(capabilityId: string, tenantId?: string): Artifact | undefined {
+    const path = join(this.root, `${capabilityId}.json`);
+    if (!existsSync(path)) return undefined;
+
+    const base = this.loadFile(path);
+    return tenantId ? this.resolveForTenant(base, tenantId) : base;
   }
 
   loadFile(path: string): Artifact {

@@ -102,6 +102,8 @@ export type PerformResult = {
 };
 
 export interface Surface {
+  readonly kind: "web" | "legacy-web" | "desktop";
+
   currentUrl(): string;
 
   observe(): Promise<Observation>;

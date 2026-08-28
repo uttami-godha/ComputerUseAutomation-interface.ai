@@ -3,16 +3,26 @@ import { join } from "node:path";
 
 import type { Surface } from "../surface/surface.ts";
 import { Redactor } from "../redaction.ts";
-import { ensureDir, pad } from "../util.ts";
+import { ensureDir, pad, runId as generateRunId } from "../util.ts";
 
 export class Evidence {
   private stepCounter = 0;
+  private redactor: Redactor;
+  private captureScreens: boolean;
+
+  readonly runDir: string;
+  readonly runId: string;
 
   constructor(
-    public runDir: string,
-    private redactor: Redactor,
-    private captureScreens = true,
+    runDir: string,
+    redactor: Redactor,
+    captureScreens = true,
   ) {
+    this.runDir = runDir;
+    this.redactor = redactor;
+    this.captureScreens = captureScreens;
+    this.runId = generateRunId();
+
     ensureDir(this.runDir);
     ensureDir(join(this.runDir, "steps"));
   }

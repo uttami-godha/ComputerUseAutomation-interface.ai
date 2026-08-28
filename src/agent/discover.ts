@@ -70,6 +70,7 @@ export class DiscoveryEngine {
   private llm: AnthropicClient;
   private model: string;
   private hitl?: HumanInTheLoop;
+  private elements = new Map<string, PerceivedElement>();
 
   constructor(
     surface: Surface,
@@ -87,6 +88,11 @@ export class DiscoveryEngine {
     this.llm = llm;
     this.model = model;
     this.hitl = hitl;
+  }
+
+  private trackObservation(obs: Observation): Observation {
+    this.elements = new Map(obs.elements.map((e) => [e.ref, e]));
+    return obs;
   }
 
   async run(
@@ -108,7 +114,7 @@ export class DiscoveryEngine {
 
     const recorder = new Recorder();
 
-    let obs = await this.surface.observe();
+    let obs = this.trackObservation(await this.surface.observe());
 
     const messages: Array<Record<string, unknown>> = [
       {
@@ -281,7 +287,7 @@ export class DiscoveryEngine {
         }
 
         // Human resumed; continue discovery from new state.
-        obs = await this.surface.observe();
+        obs = this.trackObservation(await this.surface.observe());
 
         messages.push({
           role: "assistant",
@@ -309,7 +315,7 @@ export class DiscoveryEngine {
 
       // Observe the new state after exactly one action and feed that state
       // back as the tool result.
-      obs = await this.surface.observe();
+      obs = this.trackObservation(await this.surface.observe());
 
       await this.evidence.screenshot(
         this.surface,
@@ -476,12 +482,17 @@ export class DiscoveryEngine {
         };
       }
 
-      const found = await this.surface.waitForText(text, 2000);
+      const asserted = await this.surface.perform({
+        type: "assert",
+        text,
+      });
 
-      if (!found) {
+      if (!asserted.ok) {
         return {
           ok: false,
-          summary: `Assertion failed: "${text}" is not visible.`,
+          summary:
+            asserted.message ??
+            `Assertion failed: "${text}" is not visible.`,
         };
       }
 
@@ -533,7 +544,7 @@ export class DiscoveryEngine {
           ? text
             ? `Waited for "${text}".`
             : `Waited ${ms ?? 500}ms.`
-          : result.error?.message ?? "wait failed",
+          : result.message ?? "wait failed",
       };
     }
 
@@ -572,7 +583,7 @@ export class DiscoveryEngine {
         ok: result.ok,
         summary: result.ok
           ? `Navigated to ${url}.`
-          : result.error?.message ?? "navigation failed",
+          : result.message ?? "navigation failed",
       };
     }
 
@@ -586,7 +597,7 @@ export class DiscoveryEngine {
       };
     }
 
-    const element = this.surface.elementForRef(ref);
+    const element = this.elements.get(ref);
 
     if (!element) {
       return {
@@ -615,11 +626,9 @@ export class DiscoveryEngine {
 
       const action: Action = {
         type: "click",
-        ref,
-        intent,
       };
 
-      const result = await this.surface.perform(action);
+      const result = await this.surface.perform(action, element.strategies);
 
       if (result.ok) {
         recorder.recordTargetAction(
@@ -632,7 +641,7 @@ export class DiscoveryEngine {
         );
       }
 
-      return this.performSummary("click", element, result.ok, result.error);
+      return this.performSummary("click", element, result.ok, result.message);
     }
 
     if (name === "type") {
@@ -656,13 +665,10 @@ export class DiscoveryEngine {
 
       const action: Action = {
         type: "type",
-        ref,
         text,
-        secret,
-        intent,
       };
 
-      const result = await this.surface.perform(action);
+      const result = await this.surface.perform(action, element.strategies);
 
       if (result.ok) {
         recorder.recordType(
@@ -676,7 +682,7 @@ export class DiscoveryEngine {
         );
       }
 
-      return this.performSummary("type", element, result.ok, result.error);
+      return this.performSummary("type", element, result.ok, result.message);
     }
 
     if (name === "select") {
@@ -691,12 +697,10 @@ export class DiscoveryEngine {
 
       const action: Action = {
         type: "select",
-        ref,
         value,
-        intent,
       };
 
-      const result = await this.surface.perform(action);
+      const result = await this.surface.perform(action, element.strategies);
 
       if (result.ok) {
         recorder.recordSelect(
@@ -713,7 +717,7 @@ export class DiscoveryEngine {
         "select",
         element,
         result.ok,
-        result.error,
+        result.message,
       );
     }
 
@@ -730,20 +734,18 @@ export class DiscoveryEngine {
 
       const action: Action = {
         type: "read",
-        ref,
-        intent,
       };
 
-      const result = await this.surface.perform(action);
+      const result = await this.surface.perform(action, element.strategies);
 
       if (!result.ok) {
         return {
           ok: false,
-          summary: result.error?.message ?? "read failed",
+          summary: result.message ?? "read failed",
         };
       }
 
-      const value = result.readValue ?? "";
+      const value = result.value ?? "";
 
       recorder.recordRead(
         element,
@@ -774,13 +776,13 @@ export class DiscoveryEngine {
     kind: string,
     element: PerceivedElement,
     ok: boolean,
-    error?: { code: string; message: string },
+    message?: string,
   ): HandleResult {
     if (!ok) {
       return {
         ok: false,
         summary:
-          error?.message ??
+          message ??
           `${kind} failed on ${element.name || element.role}`,
       };
     }
