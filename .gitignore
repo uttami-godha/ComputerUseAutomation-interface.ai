@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Secrets - never commit
+.env
+.env.*
+!.env.example
+
+# Runtime output (evidence for the committed demo lives in /evidence and IS committed;
+# ad-hoc local runs go to /runs and are ignored)
+runs/
+
+# OS / editor
+.DS_Store
+*.log
+.idea/
+.vscode/
