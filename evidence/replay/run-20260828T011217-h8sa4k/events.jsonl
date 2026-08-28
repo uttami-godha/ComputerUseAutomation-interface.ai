@@ -1,0 +1,9 @@
+{"t":"2026-08-28T01:12:17.158Z","type":"replay_start","capabilityId":"servicing.read_savings_balance","version":1,"status":"approved","tenantId":"cu-a"}
+{"t":"2026-08-28T01:12:17.230Z","type":"replay_entry_navigate","url":"http://localhost:7799/t/cu-a/"}
+{"t":"2026-08-28T01:12:17.231Z","type":"step_start","id":"type-operator","intent":"Enter the operator ID","action":"type","risk":"safe"}
+{"t":"2026-08-28T01:12:17.343Z","type":"step_start","id":"type-password","intent":"Enter the operator password","action":"type","risk":"safe"}
+{"t":"2026-08-28T01:12:17.381Z","type":"step_start","id":"click-signin","intent":"Sign in","action":"click","risk":"safe"}
+{"t":"2026-08-28T01:12:17.558Z","type":"checkpoint_ok","id":"click-signin","text":"Member Lookup"}
+{"t":"2026-08-28T01:12:17.559Z","type":"step_start","id":"type-member","intent":"Enter the member ID","action":"type","risk":"safe"}
+{"t":"2026-08-28T01:12:17.609Z","type":"step_start","id":"click-search","intent":"Search for the member","action":"click","risk":"safe"}
+{"t":"2026-08-28T01:12:17.732Z","type":"business_outcome","outcome":"NO_SUCH_MEMBER","step":"click-search"}

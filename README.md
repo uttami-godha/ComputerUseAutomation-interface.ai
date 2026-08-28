@@ -45,6 +45,8 @@ Then set:
 ANTHROPIC_API_KEY=...
 ```
 
+`.env` is loaded automatically by the `discover`/`replay` CLI commands shown below (via Node's `--env-file-if-exists`), so no extra tooling or shell exports are needed.
+
 The default mock application runs on port `7799`.
 
 ## Quick start
@@ -207,15 +209,24 @@ Discovery is the only path that requires an LLM.
 Start the mock app, configure `ANTHROPIC_API_KEY`, then run:
 
 ```bash
-node src/cli.ts discover \
-  --goal "Log in, look up member 12345, and read the savings balance" \
+node --env-file-if-exists=.env src/cli.ts discover \
+  --goal "Sign in, look up member 12345, and read the savings balance" \
   --capability servicing.read_savings_balance \
-  --name "Read member savings balance"
+  --name "Read member savings balance" \
+  --base-url http://localhost:7799 \
+  --entry-path /t/cu-a/ \
+  --tenant cu-a \
+  --param operator_id=op-jsmith \
+  --param operator_password=demo-not-a-real-secret \
+  --param member_id=12345
 ```
+
+`--param` values are handed to the model directly (never embedded in `--goal`, which becomes the artifact's `description`), so it can type them without a real credential ever being persisted as a literal in the saved artifact.
 
 The discovery agent receives:
 
 - the goal;
+- known values it may type (from `--param`);
 - current URL/title;
 - visible text;
 - a normalized element map;

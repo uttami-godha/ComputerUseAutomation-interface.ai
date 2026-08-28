@@ -1,0 +1,23 @@
+{"t":"2026-08-28T01:19:07.922Z","type":"replay_start","capabilityId":"servicing.open_subaccount","version":1,"status":"draft","tenantId":"cu-a"}
+{"t":"2026-08-28T01:19:07.968Z","type":"replay_entry_navigate","url":"http://localhost:7799/t/cu-a/"}
+{"t":"2026-08-28T01:19:07.970Z","type":"step_start","id":"type-operator","intent":"Enter operator ID","action":"type","risk":"safe"}
+{"t":"2026-08-28T01:19:08.089Z","type":"step_start","id":"type-password","intent":"Enter operator password","action":"type","risk":"safe"}
+{"t":"2026-08-28T01:19:08.119Z","type":"step_start","id":"click-signin","intent":"Sign in","action":"click","risk":"safe"}
+{"t":"2026-08-28T01:19:08.288Z","type":"checkpoint_ok","id":"click-signin","text":"Member Lookup"}
+{"t":"2026-08-28T01:19:08.288Z","type":"step_start","id":"type-member","intent":"Enter member ID","action":"type","risk":"safe"}
+{"t":"2026-08-28T01:19:08.330Z","type":"step_start","id":"click-search","intent":"Search for member","action":"click","risk":"safe"}
+{"t":"2026-08-28T01:19:08.460Z","type":"checkpoint_ok","id":"click-search","text":"Member Detail"}
+{"t":"2026-08-28T01:19:08.461Z","type":"step_start","id":"click-open-subaccount","intent":"Open the sub-account workflow","action":"click","risk":"safe"}
+{"t":"2026-08-28T01:19:08.599Z","type":"checkpoint_ok","id":"click-open-subaccount","text":"Open Sub-Account for Member"}
+{"t":"2026-08-28T01:19:08.600Z","type":"step_start","id":"select-account-type","intent":"Choose account type","action":"select","risk":"safe"}
+{"t":"2026-08-28T01:19:08.666Z","type":"step_start","id":"type-initial-deposit","intent":"Enter initial deposit","action":"type","risk":"safe"}
+{"t":"2026-08-28T01:19:08.699Z","type":"step_start","id":"type-nickname","intent":"Enter account nickname","action":"type","risk":"safe"}
+{"t":"2026-08-28T01:19:08.722Z","type":"step_start","id":"click-review","intent":"Review the new sub-account request","action":"click","risk":"risky"}
+{"t":"2026-08-28T01:19:08.723Z","type":"intervention_requested","reason":"risky_confirmation","detail":"risky action requires an approved artifact or --allow-risky","stepId":"click-review","suggested":"Get the live session to the required state, then resume."}
+{"t":"2026-08-28T01:19:08.805Z","type":"intervention_requested","runId":"run-20260828T011907-gbzl7q","capabilityId":"servicing.open_subaccount","goal":"Sign in, find a member, open the sub-account flow, enter account details, review the request, and return the confirmation reference.","stepId":"click-review","reason":"risky_confirmation","detail":"risky action requires an approved artifact or --allow-risky","url":"http://localhost:7799/t/cu-a/member/12345/subaccount","screenshotPath":"steps/001-intervention_click_review.png","visibleTextExcerpt":"Open Sub-Account for Member #12345\nAccount Type \nChoose...\nSavings\nMoney Market\nCD\nInitial Deposit \nNickname \nReview","suggested":"Get the live session to the required state, then resume.","consoleUrl":"http://localhost:7788/"}
+{"t":"2026-08-28T01:19:21.162Z","type":"intervention_resolved","capabilityId":"servicing.open_subaccount","stepId":"click-review","note":"Reviewed sub-account request on the live session - deposit and account type look correct, authorizing the risky Review step.","url":"http://localhost:7799/t/cu-a/member/12345/subaccount"}
+{"t":"2026-08-28T01:19:21.162Z","type":"intervention_resolved","note":"Reviewed sub-account request on the live session - deposit and account type look correct, authorizing the risky Review step."}
+{"t":"2026-08-28T01:19:21.271Z","type":"checkpoint_ok","id":"click-review","text":"Review New Sub-Account"}
+{"t":"2026-08-28T01:19:21.272Z","type":"step_start","id":"read-confirmation","intent":"Read the confirmation reference","action":"read","risk":"safe"}
+{"t":"2026-08-28T01:19:21.337Z","type":"extracted","as":"confirmation_ref","redacted":false}
+{"t":"2026-08-28T01:19:21.345Z","type":"replay_success","outputs":{"confirmation_ref":"SA-4821"}}

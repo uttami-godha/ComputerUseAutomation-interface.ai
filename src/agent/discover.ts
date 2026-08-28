@@ -45,6 +45,12 @@ export type DiscoveryOptions = {
   capabilityId: string;
   name: string;
   policyVersion: number;
+  // Concrete values (operator credentials, a member id, ...) the model may
+  // type during this run. These reach the model directly - never the goal
+  // text - so they never land in the artifact's description or get echoed
+  // back into the model's own reasoning. The recorder still only persists
+  // param references, never literals, in the saved artifact.
+  knownValues?: Record<string, string>;
 };
 
 export type DiscoveryResult = {
@@ -117,10 +123,21 @@ export class DiscoveryEngine {
 
     let obs = this.trackObservation(await this.surface.observe());
 
+    const knownValues = opts.knownValues ?? {};
+    const knownValuesNote =
+      Object.keys(knownValues).length > 0
+        ? `Known values you may type into matching fields (call them by name, ` +
+          `don't restate the literal values in your reasoning): ` +
+          Object.entries(knownValues)
+            .map(([k, v]) => `${k}=${v}`)
+            .join(", ") +
+          `. Mark any password/credential field as secret: true when typing it.`
+        : undefined;
+
     const messages: Message[] = [
       {
         role: "user",
-        content: this.obsContent(obs, goal),
+        content: this.obsContent(obs, goal, knownValuesNote),
       },
     ];
 

@@ -1,0 +1,16 @@
+{"t":"2026-08-28T01:12:43.541Z","type":"replay_start","capabilityId":"servicing.open_subaccount","version":1,"status":"draft","tenantId":"cu-a"}
+{"t":"2026-08-28T01:12:43.569Z","type":"replay_entry_navigate","url":"http://localhost:7799/t/cu-a/"}
+{"t":"2026-08-28T01:12:43.569Z","type":"step_start","id":"type-operator","intent":"Enter operator ID","action":"type","risk":"safe"}
+{"t":"2026-08-28T01:12:43.642Z","type":"step_start","id":"type-password","intent":"Enter operator password","action":"type","risk":"safe"}
+{"t":"2026-08-28T01:12:43.663Z","type":"step_start","id":"click-signin","intent":"Sign in","action":"click","risk":"safe"}
+{"t":"2026-08-28T01:12:43.755Z","type":"checkpoint_ok","id":"click-signin","text":"Member Lookup"}
+{"t":"2026-08-28T01:12:43.756Z","type":"step_start","id":"type-member","intent":"Enter member ID","action":"type","risk":"safe"}
+{"t":"2026-08-28T01:12:43.779Z","type":"step_start","id":"click-search","intent":"Search for member","action":"click","risk":"safe"}
+{"t":"2026-08-28T01:12:43.882Z","type":"checkpoint_ok","id":"click-search","text":"Member Detail"}
+{"t":"2026-08-28T01:12:43.883Z","type":"step_start","id":"click-open-subaccount","intent":"Open the sub-account workflow","action":"click","risk":"safe"}
+{"t":"2026-08-28T01:12:43.984Z","type":"checkpoint_ok","id":"click-open-subaccount","text":"Open Sub-Account for Member"}
+{"t":"2026-08-28T01:12:43.984Z","type":"step_start","id":"select-account-type","intent":"Choose account type","action":"select","risk":"safe"}
+{"t":"2026-08-28T01:12:44.006Z","type":"step_start","id":"type-initial-deposit","intent":"Enter initial deposit","action":"type","risk":"safe"}
+{"t":"2026-08-28T01:12:44.025Z","type":"step_start","id":"type-nickname","intent":"Enter account nickname","action":"type","risk":"safe"}
+{"t":"2026-08-28T01:12:44.041Z","type":"step_start","id":"click-review","intent":"Review the new sub-account request","action":"click","risk":"risky"}
+{"t":"2026-08-28T01:12:44.042Z","type":"intervention_requested","reason":"irreversible_confirmation","detail":"irreversible action requires explicit confirmation","stepId":"click-review","suggested":"Get the live session to the required state, then resume."}

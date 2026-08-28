@@ -1,0 +1,13 @@
+{"t":"2026-08-28T01:12:24.831Z","type":"replay_start","capabilityId":"servicing.read_savings_balance","version":1,"status":"approved","tenantId":"cu-a"}
+{"t":"2026-08-28T01:12:24.860Z","type":"replay_entry_navigate","url":"http://localhost:7799/t/cu-a/"}
+{"t":"2026-08-28T01:12:24.861Z","type":"step_start","id":"type-operator","intent":"Enter the operator ID","action":"type","risk":"safe"}
+{"t":"2026-08-28T01:12:24.943Z","type":"step_start","id":"type-password","intent":"Enter the operator password","action":"type","risk":"safe"}
+{"t":"2026-08-28T01:12:24.965Z","type":"step_start","id":"click-signin","intent":"Sign in","action":"click","risk":"safe"}
+{"t":"2026-08-28T01:12:25.068Z","type":"checkpoint_ok","id":"click-signin","text":"Member Lookup"}
+{"t":"2026-08-28T01:12:25.069Z","type":"step_start","id":"type-member","intent":"Enter the member ID","action":"type","risk":"safe"}
+{"t":"2026-08-28T01:12:25.093Z","type":"step_start","id":"click-search","intent":"Search for the member","action":"click","risk":"safe"}
+{"t":"2026-08-28T01:12:25.194Z","type":"recoverable_condition","outcome":"SESSION_INTERSTITIAL","action":"dismiss_and_continue","step":"click-search"}
+{"t":"2026-08-28T01:12:25.283Z","type":"checkpoint_ok","id":"click-search","text":"Member Detail"}
+{"t":"2026-08-28T01:12:25.284Z","type":"step_start","id":"read-1","intent":"Read the savings balance value","action":"read","risk":"safe"}
+{"t":"2026-08-28T01:12:25.335Z","type":"extracted","as":"savings_balance","redacted":false}
+{"t":"2026-08-28T01:12:25.341Z","type":"replay_success","outputs":{"savings_balance":"$100.00"}}

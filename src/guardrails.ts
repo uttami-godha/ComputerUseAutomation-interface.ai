@@ -14,6 +14,10 @@ export type ClassifyRiskInput = {
   actionType: string;
   intent?: string;
   controlText?: string;
+  // A risk class already recorded on the artifact step (from discovery, or a
+  // human review). Keyword inference below can only raise the classification
+  // above this floor, never silently drop back below it.
+  recordedRisk?: RiskClass;
 };
 
 export type HandlingContext = {
@@ -24,6 +28,21 @@ export type HandlingContext = {
 
 function normalize(value: string): string {
   return value.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+// Plain substring matching would flag "Confirmation Ref" for the "confirm"
+// keyword, or "submitted" for "submit" - match whole words/phrases only.
+function containsKeyword(text: string, keyword: string): boolean {
+  const pattern = new RegExp(
+    `\\b${escapeRegExp(normalize(keyword))}\\b`,
+    "i",
+  );
+
+  return pattern.test(text);
 }
 
 // Shared by discovery (live classification of the model's next action) and
@@ -37,25 +56,26 @@ export class Guardrails {
   }
 
   classifyRisk(input: ClassifyRiskInput): RiskClass {
-    const combined = normalize(
-      `${input.intent ?? ""} ${input.controlText ?? ""}`,
-    );
+    const combined =
+      `${input.intent ?? ""} ${input.controlText ?? ""}`;
 
     if (
       this.policy.risk.irreversibleIntents.some((x) =>
-        combined.includes(normalize(x)),
-      )
+        containsKeyword(combined, x),
+      ) ||
+      input.recordedRisk === "irreversible"
     ) {
       return "irreversible";
     }
 
     if (
       this.policy.risk.riskyIntents.some((x) =>
-        combined.includes(normalize(x)),
+        containsKeyword(combined, x),
       ) ||
       this.policy.risk.riskyControlText.some((x) =>
-        combined.includes(normalize(x)),
-      )
+        containsKeyword(combined, x),
+      ) ||
+      input.recordedRisk === "risky"
     ) {
       return "risky";
     }

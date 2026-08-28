@@ -300,7 +300,7 @@
         "type": "click"
       },
       "target": {
-        "description": "Review submit button by role+name. RISKY: mutates state, so gated on approval/confirmation at replay.",
+        "description": "Review-step button by role+name. RISKY: mutates state, so gated on approval/confirmation at replay.",
         "strategies": [
           {
             "kind": "role",

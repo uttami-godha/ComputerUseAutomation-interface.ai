@@ -9,8 +9,8 @@
   },
   "scripts": {
     "mock": "node src/mock-app/server.ts",
-    "discover": "node src/cli.ts discover",
-    "replay": "node src/cli.ts replay",
+    "discover": "node --env-file-if-exists=.env src/cli.ts discover",
+    "replay": "node --env-file-if-exists=.env src/cli.ts replay",
     "capabilities": "node src/cli.ts capabilities",
     "schema": "node src/cli.ts schema",
     "test": "node tests/harness.ts",

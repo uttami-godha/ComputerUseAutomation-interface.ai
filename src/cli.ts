@@ -335,6 +335,8 @@ async function main(): Promise<void> {
             },
             policyVersion:
               config.policy.version,
+            knownValues:
+              params(args),
           },
         );
 
@@ -533,6 +535,7 @@ Commands:
     --base-url <url>
     [--entry-path <path>]
     [--tenant <id>]
+    [--param name=value ...]
     [--policy <file>]
     [--out <dir>]
     [--headed]

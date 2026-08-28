@@ -1,0 +1,16 @@
+{"t":"2026-08-28T01:18:57.130Z","type":"replay_start","capabilityId":"servicing.open_subaccount","version":1,"status":"draft","tenantId":"cu-a"}
+{"t":"2026-08-28T01:18:57.160Z","type":"replay_entry_navigate","url":"http://localhost:7799/t/cu-a/"}
+{"t":"2026-08-28T01:18:57.161Z","type":"step_start","id":"type-operator","intent":"Enter operator ID","action":"type","risk":"safe"}
+{"t":"2026-08-28T01:18:57.248Z","type":"step_start","id":"type-password","intent":"Enter operator password","action":"type","risk":"safe"}
+{"t":"2026-08-28T01:18:57.272Z","type":"step_start","id":"click-signin","intent":"Sign in","action":"click","risk":"safe"}
+{"t":"2026-08-28T01:18:57.388Z","type":"checkpoint_ok","id":"click-signin","text":"Member Lookup"}
+{"t":"2026-08-28T01:18:57.389Z","type":"step_start","id":"type-member","intent":"Enter member ID","action":"type","risk":"safe"}
+{"t":"2026-08-28T01:18:57.422Z","type":"step_start","id":"click-search","intent":"Search for member","action":"click","risk":"safe"}
+{"t":"2026-08-28T01:18:57.526Z","type":"checkpoint_ok","id":"click-search","text":"Member Detail"}
+{"t":"2026-08-28T01:18:57.526Z","type":"step_start","id":"click-open-subaccount","intent":"Open the sub-account workflow","action":"click","risk":"safe"}
+{"t":"2026-08-28T01:18:57.608Z","type":"checkpoint_ok","id":"click-open-subaccount","text":"Open Sub-Account for Member"}
+{"t":"2026-08-28T01:18:57.608Z","type":"step_start","id":"select-account-type","intent":"Choose account type","action":"select","risk":"safe"}
+{"t":"2026-08-28T01:18:57.634Z","type":"step_start","id":"type-initial-deposit","intent":"Enter initial deposit","action":"type","risk":"safe"}
+{"t":"2026-08-28T01:18:57.654Z","type":"step_start","id":"type-nickname","intent":"Enter account nickname","action":"type","risk":"safe"}
+{"t":"2026-08-28T01:18:57.677Z","type":"step_start","id":"click-review","intent":"Review the new sub-account request","action":"click","risk":"risky"}
+{"t":"2026-08-28T01:18:57.678Z","type":"intervention_requested","reason":"risky_confirmation","detail":"risky action requires an approved artifact or --allow-risky","stepId":"click-review","suggested":"Get the live session to the required state, then resume."}

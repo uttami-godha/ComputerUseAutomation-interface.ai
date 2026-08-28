@@ -1,0 +1,19 @@
+{"t":"2026-08-28T01:18:59.157Z","type":"replay_start","capabilityId":"servicing.open_subaccount","version":1,"status":"draft","tenantId":"cu-a"}
+{"t":"2026-08-28T01:18:59.189Z","type":"replay_entry_navigate","url":"http://localhost:7799/t/cu-a/"}
+{"t":"2026-08-28T01:18:59.190Z","type":"step_start","id":"type-operator","intent":"Enter operator ID","action":"type","risk":"safe"}
+{"t":"2026-08-28T01:18:59.292Z","type":"step_start","id":"type-password","intent":"Enter operator password","action":"type","risk":"safe"}
+{"t":"2026-08-28T01:18:59.318Z","type":"step_start","id":"click-signin","intent":"Sign in","action":"click","risk":"safe"}
+{"t":"2026-08-28T01:18:59.421Z","type":"checkpoint_ok","id":"click-signin","text":"Member Lookup"}
+{"t":"2026-08-28T01:18:59.422Z","type":"step_start","id":"type-member","intent":"Enter member ID","action":"type","risk":"safe"}
+{"t":"2026-08-28T01:18:59.452Z","type":"step_start","id":"click-search","intent":"Search for member","action":"click","risk":"safe"}
+{"t":"2026-08-28T01:18:59.564Z","type":"checkpoint_ok","id":"click-search","text":"Member Detail"}
+{"t":"2026-08-28T01:18:59.565Z","type":"step_start","id":"click-open-subaccount","intent":"Open the sub-account workflow","action":"click","risk":"safe"}
+{"t":"2026-08-28T01:18:59.682Z","type":"checkpoint_ok","id":"click-open-subaccount","text":"Open Sub-Account for Member"}
+{"t":"2026-08-28T01:18:59.683Z","type":"step_start","id":"select-account-type","intent":"Choose account type","action":"select","risk":"safe"}
+{"t":"2026-08-28T01:18:59.710Z","type":"step_start","id":"type-initial-deposit","intent":"Enter initial deposit","action":"type","risk":"safe"}
+{"t":"2026-08-28T01:18:59.729Z","type":"step_start","id":"type-nickname","intent":"Enter account nickname","action":"type","risk":"safe"}
+{"t":"2026-08-28T01:18:59.748Z","type":"step_start","id":"click-review","intent":"Review the new sub-account request","action":"click","risk":"risky"}
+{"t":"2026-08-28T01:18:59.857Z","type":"checkpoint_ok","id":"click-review","text":"Review New Sub-Account"}
+{"t":"2026-08-28T01:18:59.857Z","type":"step_start","id":"read-confirmation","intent":"Read the confirmation reference","action":"read","risk":"safe"}
+{"t":"2026-08-28T01:18:59.929Z","type":"extracted","as":"confirmation_ref","redacted":false}
+{"t":"2026-08-28T01:18:59.936Z","type":"replay_success","outputs":{"confirmation_ref":"SA-4821"}}

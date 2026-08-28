@@ -280,6 +280,44 @@ export class ReplayEngine {
       tenantId: opts.tenantId,
     });
 
+    // Replay assumes nothing about the surface's starting state - it must
+    // navigate to the artifact's recorded entry point itself before the
+    // first step runs.
+    const entryUrl = artifact.target.baseUrl + artifact.target.entryPath;
+    const entryStep = artifact.steps[0]!;
+
+    const entryNavAllowed = this.guardrails.checkNavigation(entryUrl);
+
+    if (!entryNavAllowed.allowed) {
+      return this.fail(
+        artifact,
+        entryStep,
+        "NAVIGATION_BLOCKED",
+        "allowlisted entry URL",
+        entryUrl,
+        entryNavAllowed.reason,
+      );
+    }
+
+    const entryNav = await this.surface.perform({
+      type: "navigate",
+      url: entryUrl,
+    });
+
+    if (!entryNav.ok) {
+      return this.fail(
+        artifact,
+        entryStep,
+        entryNav.code ?? "ACTION_FAILED",
+        "navigate to entry point",
+        entryNav.message,
+      );
+    }
+
+    this.evidence.event("replay_entry_navigate", {
+      url: entryUrl,
+    });
+
     for (const step of artifact.steps) {
       stepsRun++;
 
@@ -294,6 +332,7 @@ export class ReplayEngine {
         actionType: step.action.type,
         intent: step.intent,
         controlText: step.target?.description,
+        recordedRisk: step.risk,
       });
 
       const handling = this.guardrails.decideHandling(
