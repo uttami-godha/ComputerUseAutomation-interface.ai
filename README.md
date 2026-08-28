@@ -1,6 +1,6 @@
 # Computer-Use Automation System
 
-A record-once / replay-many computer-use system for legacy back-office applications.
+A record-once / replay-many computer-use system for legacy back-office applications. From my understanding, banks and credit unions run a lot of old internal software that has no API, and the only way to do anything is to click through the screens like a human employee would. The objective of this repo is to build a system that lets an AI actually operate that old software safely and reliably.
 
 The system uses an LLM once during **discovery** to operate a live application and capture the workflow as a typed capability artifact. That artifact can then be replayed deterministically, with **no model in the execution loop**.
 
